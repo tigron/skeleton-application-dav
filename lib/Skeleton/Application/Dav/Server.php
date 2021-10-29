@@ -15,9 +15,9 @@ class Server {
 	 * @access public
 	 */
 	public function accept_request() {
+		$config = \Skeleton\Core\Config::get();	
 		$application = \Skeleton\Core\Application::get();
 		$application->call_event_if_exists('application', 'bootstrap', [ ]);
-
 		
 		if ($application->event_exists('dav', 'authenticate')) {
 			$auth_backend = new \Sabre\DAV\Auth\Backend\BasicCallBack(function($username, $password) use ($application) {
@@ -30,8 +30,14 @@ class Server {
 		}			
 
 		$server = new \Sabre\DAV\Server($root);
-		$server->debugExceptions = true;
-		$server->setBaseUri('/');
+		if (isset($config->debug) and $config->debug === true) {
+			$server->debugExceptions = true;
+		}
+		if (isset($config->base_uri)) {
+			$server->setBaseUri($config->base_uri);
+		} else {
+			$server->setBaseUri('/');
+		}
 
 		$browser_plugin = new \Sabre\DAV\Browser\Plugin();
 		$server->addPlugin($browser_plugin);
@@ -39,11 +45,10 @@ class Server {
 		$guess_plugin = new \Sabre\DAV\Browser\GuessContentType();
 		$server->addPlugin($guess_plugin);
 
-		$config = \Skeleton\Core\Config::get();
 		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_dir);
 		$server->addPlugin($tffp);
 
-		$locksBackend = new \Sabre\DAV\Locks\Backend\File('/tmp/davlocks');
+		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir);
 		// Add the plugin to the server.
 		$locksPlugin = new \Sabre\DAV\Locks\Plugin(
 			$locksBackend
