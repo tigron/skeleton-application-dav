@@ -1,0 +1,22 @@
+{
+    "name": "tigron/skeleton-application-dav",
+    "description": "Webdav application for Skeleton",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tigron BVBA",
+            "email": "support@tigron.be"
+        }
+    ],
+    "require": {
+        "tigron/skeleton-core": ">=2",
+	"sabre/dav": "^4.1"
+    },
+    "suggest": {
+        "tigron/skeleton-template": "*"
+    },
+    "autoload": {
+        "psr-4": { "Skeleton\\Application\\": "lib/Skeleton/Application/" }
+    }
+}
