@@ -1,11 +1,10 @@
 <?php
 /**
- * Skeleton Core Application class
+ * Dav server class
  *
  * @author Christophe Gosiau <christophe@tigron.be>
  * @author Gerry Demaret <gerry@tigron.be>
  */
-
 namespace Skeleton\Application\Dav;
 
 class Server {
@@ -19,12 +18,16 @@ class Server {
 		$application = \Skeleton\Core\Application::get();
 		$application->call_event_if_exists('application', 'bootstrap', [ ]);
 
-		$auth_backend = new \Sabre\DAV\Auth\Backend\BasicCallBack(function($username, $password) use ($application) {
-			return $application->call_event_if_exists('dav', 'authenticate', [ $username, $password ]);
-		});
-		$auth_plugin = new \Sabre\DAV\Auth\Plugin($auth_backend);
-
-		$root = new \Skeleton\Application\Dav\Server\Root($auth_plugin);
+		
+		if ($application->event_exists('dav', 'authenticate')) {
+			$auth_backend = new \Sabre\DAV\Auth\Backend\BasicCallBack(function($username, $password) use ($application) {
+				return $application->call_event_if_exists('dav', 'authenticate', [ $username, $password ]);
+			});
+			$auth_plugin = new \Sabre\DAV\Auth\Plugin($auth_backend);
+			$root = new \Skeleton\Application\Dav\Server\Root($auth_plugin);
+		} else {
+			$root = $application->call_event_if_exists('dav', 'get_root', [$this]);		
+		}			
 
 		$server = new \Sabre\DAV\Server($root);
 		$server->debugExceptions = true;
@@ -46,9 +49,11 @@ class Server {
 			$locksBackend
 		);
 		$server->addPlugin($locksPlugin);
-		$server->addPlugin($auth_plugin);
+		if (isset($auth_plugin)) {
+			$server->addPlugin($auth_plugin);
+		}
 		$server->exec();
 
-		$application->call_event_if_exists('application', 'bootstrap', [ ]);
+		$application->call_event_if_exists('application', 'teardown', [ ]);
 	}
 }
