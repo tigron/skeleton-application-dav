@@ -6,7 +6,7 @@ project.
 
 Installation via composer:
 
-    composer require tigron/skeleton-application-api
+    composer require tigron/skeleton-application-dav
 
 ## Setup the application
 
