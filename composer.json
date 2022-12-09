@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "tigron/skeleton-core": ">=2",
+        "tigron/skeleton-core": ">=4",
 	"sabre/dav": "^4.1"
     },
     "suggest": {
