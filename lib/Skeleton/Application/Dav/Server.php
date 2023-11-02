@@ -48,7 +48,7 @@ class Server {
 		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_dir);
 		$server->addPlugin($tffp);
 
-		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir);
+		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir . '/dav.lock');
 		// Add the plugin to the server.
 		$locksPlugin = new \Sabre\DAV\Locks\Plugin(
 			$locksBackend
