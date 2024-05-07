@@ -49,6 +49,14 @@ class Server {
 		$server->addPlugin($tffp);
 
 		$server->on('exception', function($exception) {
+			if (is_a($exception, 'Sabre\DAV\Exception\NotAuthenticated')) {
+				// we ignore authentication errors
+				return;
+			}
+			if (is_a($exception, 'Sabre\DAV\Exception\NotFound')) {
+				// ignore file not found
+				return;
+			}
 			// We need skeleton-error
 			if (!class_exists('\Skeleton\Error\Handler\SentrySdk')) {
 				return;
