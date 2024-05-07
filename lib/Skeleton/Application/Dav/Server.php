@@ -48,6 +48,26 @@ class Server {
 		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_dir);
 		$server->addPlugin($tffp);
 
+		$server->on('exception', function($exception) {
+			// We need skeleton-error
+			if (!class_exists('\Skeleton\Error\Handler\SentrySdk')) {
+				return;
+			}
+			// Check if sentry package is installed
+			if (!class_exists('\Sentry\SentrySdk')) {
+				return;
+			}
+
+			// Is sentry configured?
+			if (\Skeleton\Error\Config::$sentry_dsn === null) {
+				return;
+			}
+
+			$handler = new \Skeleton\Error\Handler\SentrySdk();
+			$handler->set_exception($exception);
+			$handler->handle();
+		});
+
 		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir . '/dav.lock');
 		// Add the plugin to the server.
 		$locksPlugin = new \Sabre\DAV\Locks\Plugin(
