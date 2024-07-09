@@ -45,7 +45,7 @@ class Server {
 		$guess_plugin = new \Sabre\DAV\Browser\GuessContentType();
 		$server->addPlugin($guess_plugin);
 
-		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_dir);
+		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_path);
 		$server->addPlugin($tffp);
 
 		$server->on('exception', function($exception) {
@@ -76,7 +76,7 @@ class Server {
 			$handler->handle();
 		});
 
-		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir . '/dav.lock');
+		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_path . '/dav.lock');
 		// Add the plugin to the server.
 		$locksPlugin = new \Sabre\DAV\Locks\Plugin(
 			$locksBackend
