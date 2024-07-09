@@ -62,6 +62,24 @@ class Dav extends \Skeleton\Core\Application {
 	}
 
 	/**
+	 * Get events
+	 *
+	 * Get a list of events for this application.
+	 * The returned array has the context as key, the value is the classname
+	 * of the default event
+	 *
+	 * @access protected
+	 * @return array $events
+	 */
+	protected function get_events(): array {
+		$parent_events = parent::get_events();
+		$dav_events = [
+			'Dav' => '\\Skeleton\\Application\\Dav\\Event\\Dav',
+		];
+		return array_merge($parent_events, $dav_events);
+	}
+
+	/**
 	 * Run the application
 	 *
 	 * @access public

@@ -15,19 +15,19 @@ class Server {
 	 * @access public
 	 */
 	public function accept_request() {
-		$config = \Skeleton\Core\Config::get();	
+		$config = \Skeleton\Core\Config::get();
 		$application = \Skeleton\Core\Application::get();
-		$application->call_event_if_exists('application', 'bootstrap', [ ]);
-		
+
 		if ($application->event_exists('dav', 'authenticate')) {
+
 			$auth_backend = new \Sabre\DAV\Auth\Backend\BasicCallBack(function($username, $password) use ($application) {
 				return $application->call_event_if_exists('dav', 'authenticate', [ $username, $password ]);
 			});
 			$auth_plugin = new \Sabre\DAV\Auth\Plugin($auth_backend);
 			$root = new \Skeleton\Application\Dav\Server\Root($auth_plugin);
 		} else {
-			$root = $application->call_event_if_exists('dav', 'get_root', [$this]);		
-		}			
+			$root = $application->call_event_if_exists('dav', 'get_root', [$this]);
+		}
 
 		$server = new \Sabre\DAV\Server($root);
 		if (isset($config->debug) and $config->debug === true) {
@@ -48,7 +48,35 @@ class Server {
 		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_dir);
 		$server->addPlugin($tffp);
 
-		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir);
+		$server->on('exception', function($exception) {
+			if (is_a($exception, 'Sabre\DAV\Exception\NotAuthenticated')) {
+				// we ignore authentication errors
+				return;
+			}
+			if (is_a($exception, 'Sabre\DAV\Exception\NotFound')) {
+				// ignore file not found
+				return;
+			}
+			// We need skeleton-error
+			if (!class_exists('\Skeleton\Error\Handler\SentrySdk')) {
+				return;
+			}
+			// Check if sentry package is installed
+			if (!class_exists('\Sentry\SentrySdk')) {
+				return;
+			}
+
+			// Is sentry configured?
+			if (\Skeleton\Error\Config::$sentry_dsn === null) {
+				return;
+			}
+
+			$handler = new \Skeleton\Error\Handler\SentrySdk();
+			$handler->set_exception($exception);
+			$handler->handle();
+		});
+
+		$locksBackend = new \Sabre\DAV\Locks\Backend\File($config->tmp_dir . '/dav.lock');
 		// Add the plugin to the server.
 		$locksPlugin = new \Sabre\DAV\Locks\Plugin(
 			$locksBackend
@@ -58,7 +86,5 @@ class Server {
 			$server->addPlugin($auth_plugin);
 		}
 		$server->exec();
-
-		$application->call_event_if_exists('application', 'teardown', [ ]);
 	}
 }
