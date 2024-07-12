@@ -73,4 +73,12 @@ The authenticate method is called to authenticate a user.
 
     public function authenticate($username, $password) {
 
+## FS - File System
 
+### File - custom properties
+
+The class that represents a file in the virtual FS (extending \Sabre\DAV\File) can implement
+
+    public function get_properties() {
+        return [ 'prop1' => 'val1', 'prop2' => 'val2' ];
+    }
