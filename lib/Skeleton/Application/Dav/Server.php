@@ -48,6 +48,15 @@ class Server {
 		$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($config->tmp_path);
 		$server->addPlugin($tffp);
 
+		$server->on('propFind', function(\Sabre\DAV\PropFind $propfind, \Sabre\DAV\INode $node) {
+			if (method_exists($node, 'get_properties') && is_callable([ $node, 'get_properties' ])) {
+				$properties = $node->get_properties();
+				foreach ($properties as $key => $value) {
+					$propfind->handle('{DAV:}' . $key, $value);
+				}
+			}
+		});
+
 		$server->on('exception', function($exception) {
 			if (is_a($exception, 'Sabre\DAV\Exception\NotAuthenticated')) {
 				// we ignore authentication errors
