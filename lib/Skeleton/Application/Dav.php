@@ -32,7 +32,7 @@ class Dav extends \Skeleton\Core\Application {
 	 *
 	 * @access protected
 	 */
-	protected function get_details() {
+	protected function get_details(): void {
 		parent::get_details();
 
 		$this->fs_path = $this->path . '/fs/';
@@ -49,7 +49,7 @@ class Dav extends \Skeleton\Core\Application {
 	 *
 	 * @access private
 	 */
-	protected function load_config() {
+	protected function load_config(): void {
 		/**
 		 * Set some defaults
 		 */
@@ -84,7 +84,7 @@ class Dav extends \Skeleton\Core\Application {
 	 *
 	 * @access public
 	 */
-	public function run() {
+	public function run(): void {
 		$server = new \Skeleton\Application\Dav\Server();
 		$server->accept_request();
 	}

@@ -14,6 +14,14 @@ use Sabre\DAV\Auth\Plugin as AuthPlugin;
 class Root extends Collection {
 
 	/**
+	 * AuthPlugin
+	 *
+	 * @access private
+	 * @var Authplugin $authPlugin
+	 */
+	private $authPlugin = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @access public
